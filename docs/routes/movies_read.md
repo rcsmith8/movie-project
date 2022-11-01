@@ -1,18 +1,25 @@
-Read one movie
+## Read one movie
+
 This route will return a single movie by ID.
 
 There are four different cases to consider:
 
-GET /movies/:movieId
-GET /movies/:movieId (incorrect ID)
-GET /movies/:movieId/theaters
-GET /movies/:movieId/reviews
-GET /movies/:movieId
+- `GET /movies/:movieId`
+- `GET /movies/:movieId` (incorrect ID)
+- `GET /movies/:movieId/theaters`
+- `GET /movies/:movieId/reviews`
+
+### GET /movies/:movieId
+
 Create a route that responds to the following request:
 
+```
 GET /movies/:movieId
+```
+
 The response from the server should look like the following.
 
+```json
 {
   "data": {
     "id": 1,
@@ -23,22 +30,34 @@ The response from the server should look like the following.
     "image_url": "https://imdb-api.com/..."
   }
 }
-GET /movies/:movieId (incorrect ID)
+```
+
+### GET /movies/:movieId (incorrect ID)
+
 If the given ID does not match an existing movie, a response like the following should be returned:
 
+```json
 {
   "error": "Movie cannot be found."
 }
-The response must have 404 as the status code.
+```
 
-GET /movies/:movieId/theaters
+The response _must_ have `404` as the status code.
+
+### GET /movies/:movieId/theaters
+
 Update your route so that it responds to the following request:
 
+```
 GET /movies/:movieId/theaters
-This route should return all the theaters where the movie is playing. This means you will need to check the movies_theaters table.
+```
 
-The response from the server for a request to /movies/1/theaters should look like the following.
+This route should return all the `theaters` where the movie is playing. This means you will need to check
+the `movies_theaters` table.
 
+The response from the server for a request to `/movies/1/theaters` should look like the following.
+
+```json
 {
   "data": [
     {
@@ -57,14 +76,21 @@ The response from the server for a request to /movies/1/theaters should look lik
     // ...
   ]
 }
-GET /movies/:movieId/reviews
+```
+
+### GET /movies/:movieId/reviews
+
 Update your route so that it responds to the following request:
 
+```
 GET /movies/:movieId/reviews
-This route should return all the reviews for the movie, including all the critic details added to a critic key of the review.
+```
 
-The response from the server for a request to /movies/1/reviews should look like the following.
+This route should return all the `reviews` for the movie, including all the `critic` details added to a `critic` key of the review.
 
+The response from the server for a request to `/movies/1/reviews` should look like the following.
+
+```json
 {
   "data": [
     {
@@ -87,3 +113,4 @@ The response from the server for a request to /movies/1/reviews should look like
     // ...
   ]
 }
+```
