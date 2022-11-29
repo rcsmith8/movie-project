@@ -1,31 +1,41 @@
-const service = require("./movies.service")
+const moviesService = require("./movies.service");
+const asyncErrorBoundary = require("../errors/asyncErrorBoundary");
 
-async function list (req, res) {
-  const { is_showing = false } = req.query;
-  res.json({ data: await service.list(Boolean(is_showing)) });
-}
-
-async function read(req, res) {
-  res.json({ data: res.locals.movie })
-}
-
-async function validateMovieId(req, res, next) {
-  const { movieId } = req.params
-  const movie = await service.read(Number(movieId));
-  
-  if(movie) {
-   res.locals.movie = movie
+async function ifMovieExists(req, res, next) {
+  const foundMovie = await moviesService.read(req.params.movieId);
+  if (foundMovie) {
+    res.locals.movie = foundMovie;
     return next();
   }
-  next ({
+
+  return next({
     status: 404,
-    message: "Movie cannot be found."
+    message: `Movie does not exist for id: ${req.params.movieId}`,
   });
-  
+}
+
+async function list(req, res, next) {
+  const data = await moviesService.list(req.query.is_showing);
+  res.json({ data });
+}
+
+async function read(req, res, next) {
+  res.json({ data: res.locals.movie });
+}
+
+async function readTheatersByMovieId(req, res, next) {
+  const data = await moviesService.listTheatersByMovieId(Number(req.params.movieId));
+  res.json({ data });
+}
+
+async function readReviewsByMovieId(req, res, next) {
+  const data = await moviesService.listReviewsByMovieId(Number(req.params.movieId));
+  res.json({ data });
 }
 
 module.exports = {
-  list,
-  read: [validateMovieId, read],
-  validateMovieId,
+  list: asyncErrorBoundary(list),
+  read: [ifMovieExists, read],
+  readTheatersByMovieId: [ifMovieExists, asyncErrorBoundary(readTheatersByMovieId)],
+  readReviewsByMovieId: [ifMovieExists, asyncErrorBoundary(readReviewsByMovieId)],
 };
