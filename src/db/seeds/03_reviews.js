@@ -43,4 +43,5 @@ exports.seed = async function (knex) {
   const movieIds = await knex("movies").select("movie_id");
 
   const reviews = generateReviews(criticIds, movieIds);
-  return knex("reviews").insert(reviews);
+  return knex("reviews").insert(reviews); 
+};
