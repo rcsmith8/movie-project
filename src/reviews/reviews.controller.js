@@ -1,39 +1,56 @@
-const reviewsService = require("./reviews.service");
-const asyncErrorBoundary = require("../errors/asyncErrorBoundary");
+const service = require("./reviews.service")
 
-async function ifReviewExists(req, res, next) {
-  const foundReview = await reviewsService.read(Number(req.params.reviewId));
-
-  if (foundReview) {
-    res.locals.review = foundReview;
-    return next();
-  }
-
-  return next({
-    status: 404,
-    message: `Review cannot be found for id: ${req.params.reviewId}`,
-  });
+async function destroy(req,res) {
+ await service.delete(Number(res.locals.review.review_id));
+	res.sendStatus(204);
 }
 
-async function update(req, res, next) {
-  const newReview = {
-    ...res.locals.review,
-    ...req.body.data,
-  };
+async function validateReviewId(req, res, next) {
+	const { reviewId } = req.params;
+	const review = await service.read(Number(reviewId));
 
-  await reviewsService.update(newReview);
-  const updatedReview = await reviewsService.read(newReview.review_id);
-  updatedReview.critic = await reviewsService.getCriticById(newReview.critic_id);
-  res.json({ data: updatedReview });
+	if(review) {
+		res.locals.review = review;
+		return next();
+	}
+
+	next({
+		status: 404,
+		message: "Review cannot be found."
+	});
 }
 
-async function destroy(req, res, next) {
-  const id = Number(req.params.reviewId);
-  await reviewsService.destroy(id);
-  res.sendStatus(204);
+async function update(req, res) {
+	const newReview = {
+		...req.body.data,
+		review_id: res.locals.review.review_id,
+	}
+
+	await service.update(newReview);
+	const review = await service.read(res.locals.review.review_id);
+
+	const reviewToReturn = {
+		...review,
+		critic: await service.readCritic(res.locals.review.critic_id),
+	}
+
+	res.json({ data: reviewToReturn });
+}
+
+async function readReviews(req, res) {
+	const reviews = await service.readReviews(res.locals.movie.movie_id);
+
+	for(let review of reviews) {
+		const critic = await service.readCritic(review.critic_id);
+
+		review["critic"] = critic;
+	}
+
+	res.json({ data: reviews });
 }
 
 module.exports = {
-  update: [asyncErrorBoundary(ifReviewExists), asyncErrorBoundary(update)],
-  delete: [asyncErrorBoundary(ifReviewExists), asyncErrorBoundary(destroy)],
+	delete: [validateReviewId, destroy],
+	update: [validateReviewId, update],
+	readReviews,
 };
