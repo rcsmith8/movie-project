@@ -1,3 +1,3 @@
 # movie-project
 
-Here is the link for the deployed front-end of the app: [Link](https://starter-movie-front-end-plum.vercel.app/)
+Here is the link for the deployed back-end: [Link](https://movie-backend-eywj.onrender.com)
